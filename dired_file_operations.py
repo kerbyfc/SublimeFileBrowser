@@ -404,16 +404,12 @@ class DiredPasteFilesToCommand(TextCommand, DiredBaseCommand):
     '''Init prompt for path where to paste, then init file ops.'''
     def run(self, edit):
         s = self.view.settings()
+        self.index   = self.get_all()
         sources_move = s.get('dired_to_move', [])
-        sources_copy = s.get('dired_to_copy', [])
-        if not (sources_move or sources_copy):
-            self.index   = self.get_all()
-            sources_copy = self.get_marked(full=True) or self.get_selected(parent=False, full=True)
-            mitems = 0
-        else:
-            mitems = len(sources_move)
-        citems = len(sources_copy)
+        sources_copy = s.get('dired_to_copy', self.get_marked(full=True) or self.get_selected(parent=False, full=True))
 
+        mitems = len(sources_move)
+        citems = len(sources_copy)
         if not (mitems or citems):
             return sublime.status_message('Nothing to paste')
 
@@ -425,7 +421,6 @@ class DiredPasteFilesToCommand(TextCommand, DiredBaseCommand):
         prompt.start(msg, window, path, self.initfo, sources_move, sources_copy)
 
     def initfo(self, destination, move, copy):
-        print(move, copy, destination)
         if NT:
             return call_SHFileOperationW(self.view, move, copy, destination)
         else:
